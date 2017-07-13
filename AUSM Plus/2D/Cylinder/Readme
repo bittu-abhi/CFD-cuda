@@ -1,0 +1,1 @@
+Here, AUSM+ mehtod is applied to a 2D cylinder for the calcualtion of convective fluxes. Parallelisation is done using CUDA

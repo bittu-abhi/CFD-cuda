@@ -20,7 +20,7 @@ cell::cell(double *state)
 
 cell::cell(){}
 
-__global__ void evaluate(cell *domain)
+__global__ void evaluate(cell *domain,double deltat)
 {
 	int x=blockIdx.x;
 	int y=threadIdx.x;
@@ -29,11 +29,11 @@ __global__ void evaluate(cell *domain)
 	if(domain[x].flag==0 || domain[x].flag==4)
 	{
 		domain[x].stateVar[y]=domain[x].stateVar[y]-(domain[x].convflux[0][y]+domain[x].convflux[1][y]+domain[x].convflux[2][y]+domain[x].convflux[3][y]\
-			-(domain[x].diffflux[0][y]+domain[x].diffflux[1][y]+domain[x].diffflux[2][y]+domain[x].diffflux[3][y]))/vol;
+			-(domain[x].diffflux[0][y]+domain[x].diffflux[1][y]+domain[x].diffflux[2][y]+domain[x].diffflux[3][y]))/vol*deltat;
 		if(y==1)
-			domain[x].stateVar[y]+=domain[x].presflux[0][0]+domain[x].presflux[1][0]+domain[x].presflux[2][0]+domain[x].presflux[3][0];
+			domain[x].stateVar[y]+=(domain[x].presflux[0][0]+domain[x].presflux[1][0]+domain[x].presflux[2][0]+domain[x].presflux[3][0])/vol*deltat;
 		if(y==2)
-			domain[x].stateVar[y]+=domain[x].presflux[0][1]+domain[x].presflux[1][1]+domain[x].presflux[2][1]+domain[x].presflux[3][1];
+			domain[x].stateVar[y]+=(domain[x].presflux[0][1]+domain[x].presflux[1][1]+domain[x].presflux[2][1]+domain[x].presflux[3][1])/vol*deltat;
 	}
 }
 
@@ -161,7 +161,7 @@ void ausmplus(double *initial,double timesteps, double deltat)
 		convectiveflux<<<25000,4,0,stream2>>>(d_domain,d_R,d_gammma);
 		diffusiveFlux<<<25000,4,0,stream3>>>(d_domain,d_R,d_gammma,d_mu,300,d_k);
 		cudaDeviceSynchronize();
-		evaluate<<<25000,4>>>(d_domain);
+		evaluate<<<25000,4>>>(d_domain,deltat);
 		Boundary<<<25000,4,0,stream4>>>(d_domain,d_initial);
 		cudaDeviceSynchronize();
 		cout<<"time = "<<t<<endl;
@@ -183,15 +183,17 @@ void ausmplus(double *initial,double timesteps, double deltat)
 
 	delete[] nodes;
 	delete[] boundary;
-	/*
+
+/*
 	//For verification of the correct neighbours and nodes
 	for (int i = 0; i < 25000; ++i)
 	{
-		//cout<<domain[i].flag<<endl;
-		//cout<<"("<<domain[i].nodes[0][0]<<","<<domain[i].nodes[0][1]<<")"<<","<<"("<<domain[i].nodes[1][0]<<","<<domain[i].nodes[1][1]<<")";
-		//cout<<"("<<domain[i].nodes[2][0]<<","<<domain[i].nodes[2][1]<<")"<<","<<"("<<domain[i].nodes[3][0]<<","<<domain[i].nodes[3][1]<<")"<<endl;
-		cout<<domain[i].nodes[0][2]<<","<<domain[i].nodes[1][2]<<","<<domain[i].nodes[2][2]<<","<<domain[i].nodes[3][2]<<","<<domain[i].flag<<" "<<i<<endl;
-		//cout<<endl;
-	} */
+		//cout<<domain[i].diffflux[0][1]<<","<<domain[i].diffflux[1][1]<<","<<domain[i].diffflux[2][1]<<","<<domain[i].diffflux[3][1]<<endl;
+		cout<<"("<<domain[i].nodes[0][0]<<","<<domain[i].nodes[0][1]<<")"<<","<<"("<<domain[i].nodes[1][0]<<","<<domain[i].nodes[1][1]<<")";
+		cout<<"("<<domain[i].nodes[2][0]<<","<<domain[i].nodes[2][1]<<")"<<","<<"("<<domain[i].nodes[3][0]<<","<<domain[i].nodes[3][1]<<")"<<endl;
+		//cout<<domain[i].face[0][0]<<","<<domain[i].face[1][0]<<","<<domain[i].face[2][0]<<","<<domain[i].face[3][0]<<"		"<<domain[i].flag<<endl;
+		cout<<endl;
+	} 
+*/
 	delete[] domain;
 }

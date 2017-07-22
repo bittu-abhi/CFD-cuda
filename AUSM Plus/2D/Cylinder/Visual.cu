@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <omp.h>
 #include "ausmPlus.h"
 
 using namespace std;
@@ -10,7 +9,7 @@ void visual(cell *domain)
 	fstream myfile1,myfile2,myfile3,myfile4;
 
 	myfile1.open("finalvalues.csv",ios::out);
-	myfile1<<"X"<<","<<"Y"<<","<<"Z"<<","<<"Rho"<<","<<"Rho*U"<<","<<"Rho*V"<<","<<"Rho*E"<<","<<"flag"<<endl;
+	myfile1<<"X"<<","<<"Y"<<","<<"Z"<<","<<"Rho"<<","<<"U"<<","<<"V"<<","<<"E"<<","<<"flag"<<endl;
 	if(myfile1.is_open())
 	{
 		cout<<"Writing final values....."<<endl;
@@ -20,9 +19,9 @@ void visual(cell *domain)
 			<<0.25*(domain[i].nodes[0][1]+domain[i].nodes[1][1]+domain[i].nodes[2][1]+domain[i].nodes[3][1])<<","<<\
 			0<<","<<\
 			domain[i].stateVar[0]<<","<<\
-			domain[i].stateVar[1]<<","<<\
-			domain[i].stateVar[2]<<","<<\
-			domain[i].stateVar[3]<<","<<\
+			domain[i].stateVar[1]/domain[i].stateVar[0]<<","<<\
+			domain[i].stateVar[2]/domain[i].stateVar[0]<<","<<\
+			domain[i].stateVar[3]/domain[i].stateVar[0]<<","<<\
 			domain[i].flag<<endl;
 		}
 	}

@@ -16,7 +16,10 @@ public:
 
 	//Contains the respective faces connected to and the nodes common tho them
 	//First row is the id of the next element,, next two are the nodes 
-	double face[4][3];
+	double face[4];
+
+	//Contains the outward normal vector to the corresponding face of the element(nx,ny),
+	double norms[4][2];
 
 	//ALl the fluxes for the paricular element
 	//The convective flux
@@ -40,6 +43,8 @@ __global__ void pressureFlux(cell *domain, double *R, double *gammma);
 __global__ void convectiveflux(cell *domain, double *R, double *gammma);
 
 __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu,double wall_temp,double *k);
+
+__global__ void calculate_norm(cell *domain);
 
 void ausmplus(double *initial,double timesteps, double deltat);
 

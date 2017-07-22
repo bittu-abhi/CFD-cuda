@@ -1,6 +1,5 @@
 #include "ausmPlus.h"
 #include <math.h>
-#include <stdio.h>
 
 __global__ void convectiveflux(cell *domain, double *R, double *gammma)
 {
@@ -92,7 +91,5 @@ __global__ void convectiveflux(cell *domain, double *R, double *gammma)
 			domain[x].convflux[y][3]+=a_mid*(0.5*(split_mach_plus+abs(split_mach_plus))*press+0.5*(split_mach_minus-abs(split_mach_minus))*press)\
 			*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 		}
-		//if(domain[x].flag==4)
-		//	printf("%lf %lf %d %d\n",domain[x].convflux[y][1],domain[x].convflux[y][2],x,y);
 	}
 }

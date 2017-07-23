@@ -5,7 +5,7 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 	int x=blockIdx.x;
 	int y=threadIdx.x;
 	int note=-1;
-	int faces=(int)domain[x].face[y];
+	int faces=(int)domain[x].face[y]-1;
 	int ourFlag=(int)domain[x].flag;
 	if(ourFlag==0 || ourFlag==4)
 	{
@@ -54,8 +54,8 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 			}
 			else
 			{
-				delu_delx=(domain[faces].stateVar[1]/domain[faces].stateVar[0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
-				delv_delx=(domain[faces].stateVar[2]/domain[faces].stateVar[0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
+				delu_delx=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
+				delv_delx=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
 			}
 			if(abs(y_cord[1]-y_cord[0])<=0.0001)
 			{
@@ -64,8 +64,8 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 			}
 			else
 			{
-				delu_dely=(domain[faces].stateVar[1]/domain[faces].stateVar[0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
-				delv_dely=(domain[faces].stateVar[2]/domain[faces].stateVar[0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
+				delu_dely=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
+				delv_dely=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
 			}
 		}
 		else
@@ -100,8 +100,8 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 		temp[0]=(gammma[0]-1)/R[0]*(domain[x].stateVar[3]-0.5*(pow(domain[x].stateVar[1],2)+pow(domain[x].stateVar[2],2))/domain[x].stateVar[0])/domain[x].stateVar[0];
 		if(ourFlag!=4 || (ourFlag==4 && y!=note)
 			)
-			temp[1]=(gammma[0]-1)/R[0]*(domain[faces].stateVar[3]-0.5*(pow(domain[faces].stateVar[1],2)\
-				+pow(domain[faces].stateVar[2],2))/domain[faces].stateVar[0])/domain[faces].stateVar[0];
+			temp[1]=(gammma[0]-1)/R[0]*(domain[x].temp_var[y][3]-0.5*(pow(domain[x].temp_var[y][1],2)\
+				+pow(domain[x].temp_var[y][2],2))/domain[x].temp_var[y][0])/domain[x].temp_var[y][0];
 		else
 		{
 			temp[1]=wall_temp;

@@ -29,6 +29,10 @@ public:
 	//The pressure flux
 	double presflux[4][2];
 
+	//To store the values of the next face element so that there is no race conditions.Columns are the 
+	//state variables. Rows are faces.
+	double temp_var[4][4];
+
 	//constructor(s)
 	cell(double *state);
 	cell();
@@ -45,6 +49,8 @@ __global__ void convectiveflux(cell *domain, double *R, double *gammma);
 __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu,double wall_temp,double *k);
 
 __global__ void calculate_norm(cell *domain);
+
+__global__ void read_values(cell *domain);
 
 void ausmplus(double *initial,double timesteps, double deltat);
 

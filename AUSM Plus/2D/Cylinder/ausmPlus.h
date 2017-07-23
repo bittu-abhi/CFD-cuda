@@ -38,22 +38,31 @@ public:
 	cell();
 };
 
+//Set the nodes of each element-co-ordinates, and the node number
 __global__ void set_nodes(double *node, cell *domain, double *boundary);
 
+//Set the element number of the faes surrounding the current element
 __global__ void set_neighbour(cell *domain);
 
+//Calcualte the pressure flux using AUSM+ scheme
 __global__ void pressureFlux(cell *domain, double *R, double *gammma);
 
+//Calcualte the convective flux using AUSM+ scheme
 __global__ void convectiveflux(cell *domain, double *R, double *gammma);
 
+//Calcualte the pressure flux using forward divided difference scheme
 __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu,double wall_temp,double *k);
 
+//Calcualte the facial norms of the four faces
 __global__ void calculate_norm(cell *domain);
 
+//Gather the state variables of the different cell values surrounding the current element to avoid race conditions(if any)
 __global__ void read_values(cell *domain);
 
+//AUSM+ scheme
 void ausmplus(double *initial,double timesteps, double deltat);
 
+//Write the values of final state variables, fluxes in different .csv files
 void visual(cell *domain);
 
 extern double gammma;

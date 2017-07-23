@@ -28,7 +28,7 @@ __global__ void evaluate(cell *domain,double deltat)
 	0.5*(domain[x].nodes[3][0]-domain[x].nodes[1][0])*(domain[x].nodes[0][1]-domain[x].nodes[2][1]));
 	if(domain[x].flag==0 || domain[x].flag==4)
 	{
-		domain[x].stateVar[y]-=(domain[x].convflux[0][y]+domain[x].convflux[1][y]+domain[x].convflux[2][y]+domain[x].convflux[3][y]\
+		domain[x].stateVar[y]-=(domain[x].convflux[0][y]+domain[x].convflux[1][y]+domain[x].convflux[2][y]+domain[x].convflux[3][y])/vol*deltat;//\
 			-(domain[x].diffflux[0][y]+domain[x].diffflux[1][y]+domain[x].diffflux[2][y]+domain[x].diffflux[3][y]))/vol*deltat;
 		if(y==1)
 			domain[x].stateVar[y]-=(domain[x].presflux[0][0]+domain[x].presflux[1][0]+domain[x].presflux[2][0]+domain[x].presflux[3][0])/vol*deltat;
@@ -135,11 +135,11 @@ void ausmplus(double *initial,double timesteps, double deltat)
 	cout<<"Initialisation : done"<<endl;
 	cout<<endl;
 
-	cudaStream_t stream1, stream2,stream3,stream4;
+	cudaStream_t stream1, stream2,stream3;
 	cudaStreamCreate(&stream1);
 	cudaStreamCreate(&stream2);
 	cudaStreamCreate(&stream3);
-	cudaStreamCreateWithFlags(&stream4,cudaStreamNonBlocking);
+
 	cudaMalloc((void **)&d_domain,25000*sizeof(cell));
 	cudaMalloc((void **)&d_node,25452*3*sizeof(double));
 	cudaMalloc((void **)&d_boundary,600*2*sizeof(double));
@@ -167,6 +167,7 @@ void ausmplus(double *initial,double timesteps, double deltat)
 	set_nodes<<<25000,4>>>(d_node,d_domain,d_boundary);
 	set_neighbour<<<25000,4>>>(d_domain);
 	calculate_norm<<<25000,4>>>(d_domain);
+	read_values<<<25000,4,0,stream1>>>(d_domain);
 
 	cudaDeviceSynchronize();
 
@@ -176,21 +177,21 @@ void ausmplus(double *initial,double timesteps, double deltat)
 	//Euler first order method
 	for (double t = 0; t < timesteps*deltat; t+=deltat)
 	{
-		pressureFlux<<<25000,4>>>(d_domain,d_R,d_gammma);
-		convectiveflux<<<25000,4>>>(d_domain,d_R,d_gammma);
-		diffusiveFlux<<<25000,4>>>(d_domain,d_R,d_gammma,d_mu,300,d_k);
+		pressureFlux<<<25000,4,0,stream1>>>(d_domain,d_R,d_gammma);
+		convectiveflux<<<25000,4,0,stream2>>>(d_domain,d_R,d_gammma);
+		diffusiveFlux<<<25000,4,0,stream3>>>(d_domain,d_R,d_gammma,d_mu,300,d_k);
 		cudaDeviceSynchronize();
 		evaluate<<<25000,4>>>(d_domain,deltat);
 		Boundary<<<25000,4>>>(d_domain,d_initial);
 		cudaDeviceSynchronize();
 		cout<<"time = "<<t<<endl;
 		cout<<endl;
+		read_values<<<25000,4,0,stream1>>>(d_domain);
+		cudaDeviceSynchronize();
 	}
 
 	cout<<endl;
 	cudaMemcpy(&domain[0],d_domain,25000*sizeof(cell),cudaMemcpyDeviceToHost);
-
-	//cudaDeviceSynchronize();
 
 	cout<<"Copying final values on the CPU from GPU : done"<<endl;
 	cout<<endl;
@@ -199,12 +200,15 @@ void ausmplus(double *initial,double timesteps, double deltat)
 	cudaStreamDestroy(stream1);
 	cudaStreamDestroy(stream2);
 	cudaStreamDestroy(stream3);	
-	cudaStreamDestroy(stream4);	
+
+	cudaFree(d_initial);
+	cudaFree(d_boundary);
 	cudaFree(d_node);
 	cudaFree(d_domain);
 
 	delete[] nodes;
 	delete[] boundary;
+	//delete[] initial1;
 
 /*
 	//For verification of the correct neighbours and nodes

@@ -1,6 +1,7 @@
 #include "ausmPlus.h"
 #include <cuda_runtime_api.h>
 #include <math.h>
+#include <stdio.h>
 
 __global__ void set_nodes(double *node, cell *domain, double *boundary)
 {
@@ -10,14 +11,12 @@ __global__ void set_nodes(double *node, cell *domain, double *boundary)
 	int temp=3*((int)(domain[x].nodes[y][2])-1);
 	domain[x].nodes[y][1]=node[temp+1];
 	domain[x].nodes[y][0]=node[temp];
+	
 	if(domain[x].nodes[y][2]>126 && domain[x].nodes[y][2]<176)
 	{
 		domain[x].flag=1;	
 	}
-	else if(domain[x].nodes[y][2]>=25402 && domain[x].nodes[y][2]<=25452)
-	{
-		domain[x].flag=2;
-	}
+	
 	for(int i=0;i<600*2;i++)
 	{
 		if(domain[x].nodes[0][2]==boundary[i] || domain[x].nodes[1][2]==boundary[i] || domain[x].nodes[2][2]==boundary[i] || domain[x].nodes[3][2]==boundary[i])
@@ -34,8 +33,13 @@ __global__ void set_nodes(double *node, cell *domain, double *boundary)
 		if(abs(domain[x].nodes[i][0]-(20+sqrt(4-pow(domain[x].nodes[i][1]-15,2))))<0.005 || abs(domain[x].nodes[i][0]-(20-sqrt(4-pow(domain[x].nodes[i][1]-15,2))))<0.005)
 			domain[x].flag=4;
 	}
-	if(flag1==1 && domain[x].flag!=1 && domain[x].flag!=2 && domain[x].flag!=4 && domain[x].flag!=0)
+	if(flag1==1 && domain[x].flag!=1 && domain[x].flag!=4 && domain[x].flag!=0)
 			domain[x].flag=3;
+
+	if(domain[x].nodes[y][2]>=25402 && domain[x].nodes[y][2]<=25452)
+	{
+		domain[x].flag=2;
+	}
 }
 
 __global__ void set_neighbour(cell *domain)
@@ -54,7 +58,7 @@ __global__ void set_neighbour(cell *domain)
 		}
 		if(flag1==1 && flag2==1)
 		{	
-			domain[x].face[y]=i;
+			domain[x].face[y]=i+1;
 			break;
 		}
 		flag1=0;
@@ -110,5 +114,41 @@ __global__ void calculate_norm(cell *domain)
 			domain[x].norms[y][0]=-1;
 		else
 			domain[x].norms[y][0]=1;
+	}
+}
+
+__global__ void read_values(cell *domain)
+{
+	int x=blockIdx.x;
+	int y=threadIdx.x;
+	int faces=(int)domain[x].face[y];
+	int note=-10;
+	if(faces<1 || faces >26000)
+	{
+		note=y;
+	}
+	if(y!=note)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			domain[x].temp_var[y][i]=domain[faces].stateVar[i];
+		}
+	}
+	else
+	{
+		if(domain[x].flag==4)
+		{
+			domain[x].temp_var[note][0]=domain[x].stateVar[0];
+			domain[x].temp_var[note][1]=-domain[x].stateVar[1];
+			domain[x].temp_var[note][2]=-domain[x].stateVar[2];
+			domain[x].temp_var[note][3]=domain[x].stateVar[3];
+		}
+		else
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				domain[x].temp_var[note][i]=0;
+			}
+		}
 	}
 }

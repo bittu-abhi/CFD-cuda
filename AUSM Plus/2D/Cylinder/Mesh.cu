@@ -102,15 +102,15 @@ __global__ void calculate_norm(cell *domain)
 	else if(m==0)
 	{
 		domain[x].norms[y][0]=0;
-		if(domain[x].nodes[(y+1)%4][1]<cen_cord[1])
+		if(domain[x].nodes[y][1]<cen_cord[1])
 			domain[x].norms[y][1]=-1;
-		else
+		else 
 			domain[x].norms[y][1]=1;
 	}
 	else
 	{
 		domain[x].norms[y][1]=0;
-		if(domain[x].nodes[(y+1)%4][0]<cen_cord[0])
+		if(domain[x].nodes[y][0]<cen_cord[0])
 			domain[x].norms[y][0]=-1;
 		else
 			domain[x].norms[y][0]=1;

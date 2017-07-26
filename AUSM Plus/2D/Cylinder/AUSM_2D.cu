@@ -28,7 +28,7 @@ __global__ void evaluate(cell *domain,double deltat)
 	0.5*(domain[x].nodes[3][0]-domain[x].nodes[1][0])*(domain[x].nodes[0][1]-domain[x].nodes[2][1]));
 	if(domain[x].flag==0 || domain[x].flag==4)
 	{
-		domain[x].stateVar[y]-=(domain[x].convflux[0][y]+domain[x].convflux[1][y]+domain[x].convflux[2][y]+domain[x].convflux[3][y]\
+		domain[x].stateVar[y]-=(domain[x].convflux[0][y]+domain[x].convflux[1][y]+domain[x].convflux[2][y]+domain[x].convflux[3][y])/vol*deltat;//\
 			-(domain[x].diffflux[0][y]+domain[x].diffflux[1][y]+domain[x].diffflux[2][y]+domain[x].diffflux[3][y]))/vol*deltat;
 		if(y==1)
 			domain[x].stateVar[y]-=(domain[x].presflux[0][0]+domain[x].presflux[1][0]+domain[x].presflux[2][0]+domain[x].presflux[3][0])/vol*deltat;
@@ -182,7 +182,7 @@ void ausmplus(double *initial,double timesteps, double deltat)
 		diffusiveFlux<<<25000,4,0,stream3>>>(d_domain,d_R,d_gammma,d_mu,300,d_k);
 		cudaDeviceSynchronize();
 		evaluate<<<25000,4>>>(d_domain,deltat);
-		Boundary<<<25000,4>>>(d_domain,d_initial);
+		Boundary<<<25000,4,0,stream1>>>(d_domain,d_initial);
 		cudaDeviceSynchronize();
 		cout<<"time = "<<t<<endl;
 		cout<<endl;

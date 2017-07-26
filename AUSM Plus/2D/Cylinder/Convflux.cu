@@ -1,6 +1,6 @@
 #include "ausmPlus.h"
 #include <math.h>
-#include <stdio.h>
+
 
 __global__ void convectiveflux(cell *domain, double *R, double *gammma)
 {
@@ -44,12 +44,21 @@ __global__ void convectiveflux(cell *domain, double *R, double *gammma)
 		else
 			split_mach_minus=-0.5*pow(machminus-1.0,2.0)-1/8*pow(pow(machminus,2.0)-1.0,2.0);
 
+		double split_mach=split_mach_plus+split_mach_minus;
+
 		for (int i = 0; i < 4; ++i)
 		{
-			domain[x].convflux[y][i]=a_mid*(0.5*(split_mach_plus+abs(split_mach_plus))*domain[x].stateVar[i]+0.5*(split_mach_minus-abs(split_mach_minus))\
+			domain[x].convflux[y][i]=a_mid*(0.5*(split_mach+abs(split_mach))*domain[x].stateVar[i]+0.5*(split_mach-abs(split_mach))\
 				*domain[x].temp_var[y][i])*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 		}
-		domain[x].convflux[y][3]+=a_mid*(0.5*(split_mach_plus+abs(split_mach_plus))*press+0.5*(split_mach_minus-abs(split_mach_minus))*press)\
+		domain[x].convflux[y][3]+=a_mid*(0.5*(split_mach+abs(split_mach))*press+0.5*(split_mach-abs(split_mach))*press)\
 		*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
+		/*if((ourFlag==4 && domain[x].face[y]<1) || (ourFlag==4 && domain[x].face[y]>24542))
+		{
+			domain[x].convflux[y][0]=0;
+			domain[x].convflux[y][3]=0;
+			domain[x].convflux[y][1]=0;
+			domain[x].convflux[y][2]=0;
+		}*/
 	}
 }

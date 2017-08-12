@@ -4,7 +4,6 @@
 #include <cuda_runtime.h>
 #include <omp.h>
 #include "ausmPlus.h"
-#include <stdio.h>
 #include <algorithm>
 
 using namespace std;

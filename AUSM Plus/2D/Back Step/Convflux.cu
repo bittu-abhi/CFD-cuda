@@ -1,7 +1,5 @@
 #include "ausmPlus.h"
 #include <math.h>
-#include <stdio.h>
-
 
 __global__ void convectiveflux(cell *domain, double *R, double *gammma)
 {

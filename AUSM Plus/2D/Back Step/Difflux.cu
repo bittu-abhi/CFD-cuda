@@ -102,11 +102,5 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 		*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 		domain[x].diffflux[y][3]=(thetaX*domain[x].norms[y][0]+thetaY*domain[x].norms[y][1])\
 		*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
-
-		/*if(abs(0.25*(domain[x].nodes[0][0]+domain[x].nodes[1][0]+domain[x].nodes[2][0]+domain[x].nodes[3][0])-0.375)<0.000001 && abs(0.25*(domain[x].nodes[0][1]+domain[x].nodes[1][1]+domain[x].nodes[2][1]+domain[x].nodes[3][1])-29.875)<0.00001)
-			printf("upper %5.14lf %5.14lf %5.14lf %5.14lf %5.14lf %d %d %d\n",domain[x].diffflux[y][2],delu_dely,(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]),y_cord[1]-y_cord[0],(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0]),x,y,note );
-	
-		if(abs(0.25*(domain[x].nodes[0][0]+domain[x].nodes[1][0]+domain[x].nodes[2][0]+domain[x].nodes[3][0])-0.3757366911)<0.000001 && abs(0.25*(domain[x].nodes[0][1]+domain[x].nodes[1][1]+domain[x].nodes[2][1]+domain[x].nodes[3][1])-13.8545675278)<0.00001)
-			printf("lower %5.14lf %5.14lf %5.14lf %5.14lf %5.14lf %d %d %d\n",domain[x].diffflux[y][2],delu_dely,(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]), y_cord[1]-y_cord[0],(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0]),x,y,note );*/
 	}
 }	

@@ -1,7 +1,6 @@
 #include "ausmPlus.h"
 #include <math.h>
 #include <algorithm>
-#include <stdio.h>
 
 __global__ void pressureFlux(cell *domain, double *R, double *gammma)
 {
@@ -52,8 +51,5 @@ __global__ void pressureFlux(cell *domain, double *R, double *gammma)
 			+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 		domain[x].presflux[y][1]=(press_one*one+press_two*two)*domain[x].norms[y][1]*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)\
 			+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
-
-		if(abs(0.25*(domain[x].nodes[0][0]+domain[x].nodes[1][0]+domain[x].nodes[2][0]+domain[x].nodes[3][0])-0.375)<0.000001 && abs(0.25*(domain[x].nodes[0][1]+domain[x].nodes[1][1]+domain[x].nodes[2][1]+domain[x].nodes[3][1])-29.875)<0.00001)
-			printf("upper %5.14lf %d %d\n",domain[x].presflux[y][0],x,y);
 	}
 }

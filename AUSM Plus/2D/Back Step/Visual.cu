@@ -9,6 +9,7 @@ using namespace std;
 
 void visual(cell *domain,double t)
 {
+	//If the pressure, convective and viscous fluxes are needed, uncomment the file writing section
 	fstream myfile1,myfile2,myfile3,myfile4;
 	stringstream ss;
 	string filename="finalvalues_";

@@ -1,1 +1,10 @@
-Here, AUSM+ mehtod is applied to a 2D cylinder for the calcualtion of convective fluxes. Parallelisation is done using CUDA
+Here, AUSM+ mehtod is applied to a 2D cylinder for the calcualtion of convective fluxes. Parallelisation is done using CUDA.
+I tried to solve the flow at inlet condition of 10 m/s sec, but since this is a compressible solver, i get a "NAN" error. However,
+at speeds greater than 50m/s, the solver is stable. This is only till the high subsonic range. In supersonic range, the solver,
+blows up due to not up to the mark implementation of boundary conditions. Initial conditions can be changes in the file starter.cu
+
+If possible, improving the mesh would help. The current mesh is just a test mesh to test the solver. Hence, with the current mesh, one
+might even obtain a back flow infront of the cylinder region. The mesh files are divied as follows:
+Nodes - gives the (X,Y,Z) location of each of the 4 nodes of the elements
+Element - gives the node number of the correspoinding node (i.e. what number to use to find its co-ordinate in the Nodes.txt)
+boundary - gives the node number which are part of the boudary. Helpful to identify the boundary

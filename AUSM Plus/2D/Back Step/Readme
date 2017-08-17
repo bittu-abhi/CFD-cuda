@@ -1,0 +1,9 @@
+The mesh files are divied as follows:
+Nodes - gives the (X,Y,Z) location of each of the 4 nodes of the elements
+Element - gives the node number of the correspoinding node (i.e. what number to use to find its co-ordinate in the Nodes.txt)
+boundary - gives the node number which are part of the boudary. Helpful to identify the boundary
+
+The geometry is a simple backstep inside a channel type of domain. The length of the channel is 100 m and the height is 30m. The height
+of the step is 14m. I have tried running the code in subsonic , high sub sonic and supersonic regimes. The code blows up in supersonic
+regime due to not accurate implementation of the exit boundary conditions. And since the code is a compressible solver's code, it 
+also does not tend to work at very low speeds such as 10m/s (I have no clue why..)

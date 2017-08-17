@@ -39,7 +39,7 @@ public:
 };
 
 //Set the nodes of each element-co-ordinates, and the node number
-__global__ void set_nodes(double *node, cell *domain, double *boundary);
+__global__ void set_nodes(double *node, cell *domain, double *boundary,double *initial);
 
 //Set the element number of the faes surrounding the current element
 __global__ void set_neighbour(cell *domain);
@@ -63,7 +63,7 @@ __global__ void read_values(cell *domain);
 void ausmplus(double *initial,double timesteps, double deltat);
 
 //Write the values of final state variables, fluxes in different .csv files
-void visual(cell *domain);
+void visual(cell *domain,double t);
 
 extern double gammma;
 extern double mu;

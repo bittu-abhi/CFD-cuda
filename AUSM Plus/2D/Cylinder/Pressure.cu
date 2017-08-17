@@ -11,6 +11,7 @@ __global__ void pressureFlux(cell *domain, double *R, double *gammma)
 	if(ourFlag==0 || ourFlag==4)
 	{
 
+
 		//Calculating the critical speed of sound for all the four sides/faces and the element itself
 		double a_s[2];
 
@@ -27,30 +28,29 @@ __global__ void pressureFlux(cell *domain, double *R, double *gammma)
 
 		//Speed of sound at facial interface
 		double a_mid=min(a_s[0],a_s[1]);
+
 		//Mach number of incoming and outgoing waves
-		double machplus=(domain[x].stateVar[1]/domain[x].stateVar[0]*domain[x].norms[y][0]+domain[x].stateVar[2]/domain[x].stateVar[0]*domain[x].norms[y][1])/a_mid;
-		double machminus=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]*domain[x].norms[y][0]+domain[x].temp_var[y][2]/domain[x].temp_var[y][0]*domain[x].norms[y][1])/a_mid;
+		double mach_one=(domain[x].stateVar[1]/domain[x].stateVar[0]*domain[x].norms[y][0]+domain[x].stateVar[2]/domain[x].stateVar[0]*domain[x].norms[y][1])/a_mid;
+		double mach_two=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]*domain[x].norms[y][0]+domain[x].temp_var[y][2]/domain[x].temp_var[y][0]*domain[x].norms[y][1])/a_mid;
 		
 		//Pressure Fluxes
-		double pressplus=(gammma[0]-1)*(domain[x].stateVar[3]-0.5*(pow(domain[x].stateVar[1],2)+pow(domain[x].stateVar[2],2))/domain[x].stateVar[0]);
-		double presminus=(gammma[0]-1)*(domain[x].temp_var[y][3]-0.5*(pow(domain[x].temp_var[y][1],2)+pow(domain[x].temp_var[y][2],2))/domain[x].temp_var[y][0]);
+		double press_one=(*gammma-1)*(domain[x].stateVar[3]-0.5*(pow(domain[x].stateVar[1],2)+pow(domain[x].stateVar[2],2))/domain[x].stateVar[0]);
+		double press_two=(*gammma-1)*(domain[x].temp_var[y][3]-0.5*(pow(domain[x].temp_var[y][1],2)+pow(domain[x].temp_var[y][2],2))/domain[x].temp_var[y][0]);
 
-		double plus,minus;
-		if(abs(machplus)>=1)
-			plus=0.5*(1+machplus/abs(machplus));
+		double one,two;
+		if(abs(mach_one)>=1)
+			one=0.5*(1+mach_one/abs(mach_one));
 		else
-			plus=0.25*pow((machplus+1),2)*(2-machplus)+3/16*machplus*pow((pow(machplus,2)-1),2);
-		if(abs(machminus)>=1)
-			minus=0.5*(1-machminus/abs(machminus));
+			one=0.25*pow((mach_one+1),2)*(2-mach_one)+3/16*mach_one*pow((pow(mach_one,2)-1),2);
+	
+		if(abs(mach_two)>=1)
+			two=0.5*(1-mach_two/abs(mach_two));
 		else
-			minus=0.25*pow((machminus-1),2)*(2+machminus)-3/16*machminus*pow((pow(machminus,2)-1),2);
+			two=0.25*pow((mach_two-1),2)*(2+mach_two)-3/16*mach_two*pow((pow(mach_two,2)-1),2);
 
-		domain[x].presflux[y][0]=(pressplus*plus+presminus*minus)*domain[x].norms[y][0]*sqrt(pow(domain[x].nodes[(y+1)%4][0]-domain[x].nodes[y][0],2)\
-		+pow(domain[x].nodes[(y+1)%4][1]-domain[x].nodes[y][1],2));
-		domain[x].presflux[y][1]=(pressplus*plus+presminus*minus)*domain[x].norms[y][1]*sqrt(pow(domain[x].nodes[(y+1)%4][0]-domain[x].nodes[y][0],2)\
-		+pow(domain[x].nodes[(y+1)%4][1]-domain[x].nodes[y][1],2));
-
-		//if(domain[x].flag==4)
-		//	printf("%lf %lf %d %d\n",domain[x].presflux[y][0],domain[x].presflux[y][1],x,y );
+		domain[x].presflux[y][0]=(press_one*one+press_two*two)*domain[x].norms[y][0]*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)\
+			+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
+		domain[x].presflux[y][1]=(press_one*one+press_two*two)*domain[x].norms[y][1]*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)\
+			+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 	}
 }

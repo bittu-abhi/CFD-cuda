@@ -1,17 +1,19 @@
 #include "ausmPlus.h"
+#include <stdio.h>
 	
 __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu,double wall_temp,double *k)
 {
 	int x=blockIdx.x;
 	int y=threadIdx.x;
-	int note=-1;
+	int note=-10;
 	int faces=(int)domain[x].face[y]-1;
 	int ourFlag=(int)domain[x].flag;
+	double delu_delx=0.0,delv_delx=0.0,delu_dely=0.0,delv_dely=0.0;
 	if(ourFlag==0 || ourFlag==4)
 	{
 		double x_cord[]={0,0},y_cord[]={0,0};
 		
-		if(domain[x].face[y]<1)
+		if(faces<0 || faces>25452)
 		{
 			note=y;
 		}
@@ -44,62 +46,35 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 				y_cord[0]+=0.25*(domain[x].nodes[i][1]);
 			}
 		}
-		double delu_delx,delv_delx,delu_dely,delv_dely;
-		if(y!=note)
+
+		if(abs(x_cord[1]-x_cord[0])<=0.0002)
 		{
-			if(abs(x_cord[1]-x_cord[0])<=0.0001)
-			{
-				delu_delx=0;
-				delv_delx=0;
-			}
-			else
-			{
-				delu_delx=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
-				delv_delx=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
-			}
-			if(abs(y_cord[1]-y_cord[0])<=0.0001)
-			{
-				delu_dely=0;
-				delv_dely=0;
-			}
-			else
-			{
-				delu_dely=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
-				delv_dely=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
-			}
+			delu_delx=0.0;
+			delv_delx=0.0;
 		}
 		else
 		{
-			if(abs(x_cord[1]-x_cord[0])<=0.0001)
-			{
-				delu_delx=0;
-				delv_delx=0;
-			}
-			else
-			{
-				delu_delx=(0-domain[x].stateVar[1]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
-				delv_delx=(0-domain[x].stateVar[2]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
-			}
-			if(abs(y_cord[1]-y_cord[0])<=0.0001)
-			{
-				delu_dely=0;
-				delv_dely=0;
-			}
-			else
-			{
-				delu_dely=(0-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
-				delv_dely=(0-domain[x].stateVar[2]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
-			}
+			delu_delx=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
+			delv_delx=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(x_cord[1]-x_cord[0]);
+		}
+		if(abs(y_cord[1]-y_cord[0])<=0.0002)
+		{
+			delu_dely=0.0;
+			delv_dely=0.0;
+		}
+		else
+		{
+			delu_dely=(domain[x].temp_var[y][1]/domain[x].temp_var[y][0]-domain[x].stateVar[1]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
+			delv_dely=(domain[x].temp_var[y][2]/domain[x].temp_var[y][0]-domain[x].stateVar[2]/domain[x].stateVar[0])/(y_cord[1]-y_cord[0]);
 		}
 
-		double tau_xx=2*mu[0]*(delu_delx-1/3*(delu_delx+delv_dely));
-		double tau_yy=2*mu[0]*(delv_dely-1/3*(delu_delx+delv_dely));
+		double tau_xx=2*mu[0]*(delu_delx-1/2*(delu_delx+delv_dely));
+		double tau_yy=2*mu[0]*(delv_dely-1/2*(delu_delx+delv_dely));
 		double tau_xy=mu[0]*(delu_dely+delv_delx);
 
 		double temp[2];
 		temp[0]=(gammma[0]-1)/R[0]*(domain[x].stateVar[3]-0.5*(pow(domain[x].stateVar[1],2)+pow(domain[x].stateVar[2],2))/domain[x].stateVar[0])/domain[x].stateVar[0];
-		if(ourFlag!=4 || (ourFlag==4 && y!=note)
-			)
+		if(ourFlag!=4 || (ourFlag==4 && y!=note))
 			temp[1]=(gammma[0]-1)/R[0]*(domain[x].temp_var[y][3]-0.5*(pow(domain[x].temp_var[y][1],2)\
 				+pow(domain[x].temp_var[y][2],2))/domain[x].temp_var[y][0])/domain[x].temp_var[y][0];
 		else
@@ -107,12 +82,12 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 			temp[1]=wall_temp;
 		}
 
-		double delT_delx,delT_dely;
-		if((x_cord[1]-x_cord[0])==0)
+		double delT_delx,delT_dely;	
+		if(abs(x_cord[1]-x_cord[0])<=0.0002)
 			delT_delx=0;
 		else
 			delT_delx=(temp[1]-temp[0])/(x_cord[1]-x_cord[0]);
-		if((y_cord[1]-y_cord[0])==0)
+		if(abs(y_cord[1]-y_cord[0])<=0.0002)
 			delT_dely=0;
 		else
 			delT_dely=(temp[1]-temp[0])/(y_cord[1]-y_cord[0]);
@@ -128,4 +103,4 @@ __global__ void diffusiveFlux(cell *domain,double *R, double *gammma, double *mu
 		domain[x].diffflux[y][3]=(thetaX*domain[x].norms[y][0]+thetaY*domain[x].norms[y][1])\
 		*sqrt(pow(domain[x].nodes[y][0]-domain[x].nodes[(y+1)%4][0],2)+pow(domain[x].nodes[y][1]-domain[x].nodes[(y+1)%4][1],2));
 	}
-}
+}	

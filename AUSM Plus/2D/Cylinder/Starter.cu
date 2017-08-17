@@ -13,22 +13,23 @@ double R;
 int main()
 {
 	gammma=1.4;
-	mu=pow(1.798,-5);
-	k=0.0251;
-	R=286.9;
+	mu=pow(1.789,-5);
+	k=0.6065;
+	R=186.9;
 	
 	double initial[4];
 	//Rho
 	initial[0]=1.225;
 	//Rho*U
-	initial[1]=0.1*initial[0];
+	initial[1]=50.000*initial[0];
 	//Rho *V
-	initial[2]=0;
+	initial[2]=0.0000;
 	//Rho*E, E is the internal energy including the kinetic energy(i.e. total intenal energy)
-	initial[3]=101325/(gammma-1)+0.5*(pow(initial[1],2)+pow(initial[2],2))/initial[0];
+	initial[3]=(101325.000-0.5000*(pow(initial[1],2.0000)+pow(initial[2],2.0000))/initial[0])/(gammma-1.0000)+\
+	0.5000*(pow(initial[1],2.0000)+pow(initial[2],2.0000))/initial[0];
 	//Time steps and delta_t
-	double timesteps=100;
-	double deltat=0.000001;
+	double timesteps=1000000;
+	double deltat=0.00001;
 	ausmplus(initial,timesteps,deltat);
 
 	return 0;

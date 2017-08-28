@@ -10,4 +10,4 @@ Element - gives the node number of the correspoinding node (i.e. what number to 
 boundary - gives the node number which are part of the boudary. Helpful to identify the boundary
 
 Update: Initially the code only worked for quadrilateral structured mesh. Now it can be used for unstructured mesh but not hybrid mesh
-i.e., mixture of rectangular and triangular elements.
+i.e., mixture of rectangular and triangular elements.For quadrilateral mesh refer to the back step implementation.

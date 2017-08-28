@@ -8,3 +8,6 @@ might even obtain a back flow infront of the cylinder region. The mesh files are
 Nodes - gives the (X,Y,Z) location of each of the 4 nodes of the elements
 Element - gives the node number of the correspoinding node (i.e. what number to use to find its co-ordinate in the Nodes.txt)
 boundary - gives the node number which are part of the boudary. Helpful to identify the boundary
+
+Update: Initially the code only worked for quadrilateral structured mesh. Now it can be used for unstructured mesh but not hybrid mesh
+i.e., mixture of rectangular and triangular elements.

@@ -9,3 +9,5 @@ The code has been parallelised using NVIDIA-CUDA. Both the formuations can be us
 The FTCS is present in the file secondW.cu . Just use the function secondW with the  required parameters
 
 NOTE: Due to error in my part, the X acts as Y and vice versa. So while visualisation this has to kept in mind.
+From the result pictures, it can be seen that,there is some error in the boundary treatment of the 6th order scheme. While
+the second order sceheme gives perfect results

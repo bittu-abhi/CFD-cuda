@@ -51,6 +51,12 @@ __device__ void TDMA(int points, double *D, int *coef,int y_level,int flagD, int
 
 __global__ void compact1D(point *pt, int points, double delta, int flagXY, int flagPSIW)
 {
+	//The co-efficents of LHS are as follows: 
+	//The first three are for left boudary point, next three for near boundary point, then is the interior point,
+	//and the last is the end boundary (right boundary).
+	//It is to be noted that the RHS co-efficients are premultiplied while calculating the RHS vector of the system of
+	//equations Ax=D, A is a tridiagonal matrix, D is the vector obtained after multiplying the co-efficients with respective
+	//location values.
 	int coef[12] = {0,2,4,1,4,1,1,3,1,4,2,0};
 	int y_level = blockIdx.x;
 	double D[500];
@@ -93,6 +99,7 @@ __global__ void compact1D(point *pt, int points, double delta, int flagXY, int f
 
 __global__ void compact2D(point *pt, int points, double delta, int flagXY)
 {
+	//The same case as above for LHS and RHS co-efficients.
 	int coef[12] = {0,1,11,1,10,1,2/11,1,2/11,11,1,0};
 	int y_level = blockIdx.x;
 	double D[500];
